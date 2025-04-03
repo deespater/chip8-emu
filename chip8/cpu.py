@@ -1,38 +1,6 @@
-PROGRAM_START = 0x200 # ??
-
-class Chip8Panic(Exception):
-    pass
-
-class Chip8Display:
-    WIDTH: int = 64
-    HEIGHT: int = 32
-
-    memory: list[bytearray]
-
-    def __init__(self):
-        self.clear()
-
-    def draw_sprite(self, sprite_data: bytes, sprite_x: int, sprite_y: int) -> None:
-        """Setting sprite data to display memory"""
-
-        for row_index, sprite_row_bytes in enumerate(sprite_data): # Length of sprite_data is the height of sprite so we iterating each row of sprite
-            for column_index in range(8):  # Sprite is fixed 8 bit width
-                dx = (sprite_x + column_index) % self.WIDTH  # Wrapping bits horizontally
-                dy = (sprite_y + row_index) % self.HEIGHT  # Wrapping bits vertically
-
-                sprite_pixel =  (sprite_row_bytes >> (7 - column_index)) & 1
-                self.memory[dy][dx] = sprite_pixel
-
-    def clear(self) -> None:
-        """Clearing memory and setting it to 0"""
-        self.memory = [bytearray(self.WIDTH) for _ in range(self.HEIGHT)]
-
-    def render(self) -> None:
-        """Rendering display memory to the screen"""
-        print('\033[H', end='')  # ANSI clear screen
-        for row in self.memory:
-            print(''.join('▓' if pixel else ' ' for pixel in row))
-
+from .display import Chip8Display
+from .errors import Chip8Panic
+from .memory import Chip8Memory
 
 class Chip8Registers:
     V_SIZE: int = 16
@@ -63,41 +31,6 @@ class Chip8Registers:
     def getI(self) -> int:
         return self.I
 
-
-class Chip8Memory:
-    SIZE: int = 4 * 1024  # 4 kb
-
-    data: bytearray
-
-    def __init__(self) -> None:
-        self.data = bytearray(self.SIZE)
-
-    def read_byte(self, address: int) -> int:
-        if not 0 <= address < len(self.data):
-            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
-
-        return self.data[address]
-
-    def write_byte(self, address: int, value: int) -> None:
-        if not 0 <= address < len(self.data):
-            raise Chip8Panic(f'Memory write out of bounds: {hex(address)}')
-
-        if not 0 <= value <= 0xFF:
-            raise Chip8Panic(f'Value {value} is not a valid byte (0-255)')
-
-        self.data[address] = value
-
-    def write(self, address: int, data: bytes | bytearray) -> None:
-        if not 0 <= address <= len(self.data) - len(data):
-            raise Chip8Panic('Memory write data outside memory bounds')
-
-        self.data[address:address + len(data)] = data
-
-    def read(self, address: int, length: int) -> bytearray:
-        if not 0 <= address <= len(self.data) - length:
-            raise Chip8Panic(f'Memory read out of bounds: {hex(address)} with length: {length}')
-
-        return bytearray(self.data[address:address + length])
 
 class Chip8:
     PROGRAM_START: int = 0x200
