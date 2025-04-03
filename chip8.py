@@ -7,7 +7,6 @@ class Chip8Display:
     WIDTH: int = 64
     HEIGHT: int = 32
 
-
     data: list[list[int]]
 
     def __init__(self):
@@ -17,14 +16,20 @@ class Chip8Display:
         for row_index, sprite_row in enumerate(sprite_data): # Length of sprite_data is the height of sprite so we iterating each row of sprite
             for column_index in range(8):  # Sprite is fixed 8 bit width
                 dx = (sprite_x + column_index) % self.WIDTH  # Wrapping bits horizontally
-                dy = (sprite_y + row_index)
+                dy = (sprite_y + row_index) % self.HEIGHT  # Wrapping bits vertically
 
-                self.data[dx][dy] ^= 1
+                sprite_pixel = (sprite_row >> (7 - column_index)) & 1  # Getting each individual sprite bit in row
+                self.data[dy][dx] = sprite_pixel
 
-                # sprite_pixel = (sprite_row >> (7 - column_index)) & 1  # Getting each individual sprite bit in row
+
 
     def clear(self) -> None:
         self.data = [[0] * self.WIDTH for _ in range(self.HEIGHT)]
+
+    def render(self) -> None:
+        print('\033[H', end='')  # ANSI clear screen
+        for row in self.data:
+            print(''.join('X' if pixel else ' ' for pixel in row))
 
 
 class Chip8Registers:
@@ -69,6 +74,10 @@ class Chip8Memory:
         if address >= self.SIZE:
             raise Chip8Panic(f'Memory: address "{hex(address)}" out of bounds')
 
+    def set(self, address: int, value: int) -> int:
+        self._validate_address(address)
+        self.data[address] = value
+
     def get(self, address: int) -> int:
         self._validate_address(address)
         return self.data[address]
@@ -76,6 +85,10 @@ class Chip8Memory:
     def read(self, address: int, length: int) -> list[int]:
         self._validate_address(address + length)
         return self.data[address:length]
+
+    def write(self, address: int, data: list[int]) -> None:
+        for offset, value in enumerate(data):
+            self.set(address + offset, value)
 
 
 class Chip8:
@@ -102,6 +115,13 @@ class Chip8:
 
         # Returning one "16-bit" integer from two read bytes
         return (high_byte << 8) | low_byte
+
+    def load_rom(self, path: str) -> None:
+        # Load a CHIP-8 ROM file into memory starting at 0x200
+
+        with open(path, 'rb') as rom_file:
+            rom_data = rom_file.read()
+            self.memory.write(self.PROGRAM_START, rom_data)
 
     def execute_opcode(self, opcode: int) -> None:
         nnn = opcode & 0x0FFF       # Addr: Lowest 12 bits of the opcode
@@ -174,6 +194,18 @@ class Chip8:
 
         self.execute_opcode(opcode)
 
+        self.display.render()
+
     def run(self) -> None:
-        while True:
-            self.tick()
+        sprite = [
+            11111111,
+            10000001,
+            10000001,
+            10000001,
+            10000001,
+            11111111,
+        ]
+        self.display.draw_sprite(sprite, 0, 0)
+        self.display.render()
+        # while True:
+        #     self.tick()
