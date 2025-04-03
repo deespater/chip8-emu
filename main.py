@@ -6,7 +6,7 @@ if __name__ == '__main__':
     os.system('clear')  # Clear terminal on start
 
     chip = Chip8()
-    # chip.load_rom("your_test.rom")  # Replace with your ROM path
+    chip.load_rom('./dummy.rom')  # Replace with your ROM path
 
     try:
         chip.run()

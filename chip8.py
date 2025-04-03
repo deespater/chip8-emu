@@ -37,11 +37,11 @@ class Chip8Display:
 class Chip8Registers:
     V_SIZE: int = 16
 
-    V: list[int]
+    V: bytearray
     I: int
 
     def __init__(self):
-        self.V = [0] * self.V_SIZE
+        self.V = bytearray(self.V_SIZE)
         self.I = 0
 
     def _validate_index(self, index: int) -> None:
@@ -86,7 +86,7 @@ class Chip8Memory:
 
     def read(self, address: int, length: int) -> list[int]:
         self._validate_address(address + length)
-        return self.data[address:length]
+        return self.data[address:address + length]
 
     def write(self, address: int, data: list[int]) -> None:
         for offset, value in enumerate(data):
@@ -165,7 +165,7 @@ class Chip8:
 
             case _ if opcode & 0xF000 == 0xA000:
                 # Annn - LD I, addr
-                 # Set I = nnn.
+                # Set I = nnn.
 
                 # The value of register I is set to nnn.
                 self.registers.setI(nnn)
@@ -199,15 +199,5 @@ class Chip8:
         self.display.render()
 
     def run(self) -> None:
-        sprite = [
-            11111111,
-            10000001,
-            10000001,
-            10000001,
-            10000001,
-            11111111,
-        ]
-        self.display.draw_sprite(sprite, 0, 0)
-        self.display.render()
-        # while True:
-        #     self.tick()
+        while True:
+            self.tick()
