@@ -72,26 +72,32 @@ class Chip8Memory:
     def __init__(self) -> None:
         self.data = bytearray(self.SIZE)
 
-    def _validate_address(self, address: int) -> None:
-        if address >= self.SIZE:
-            raise Chip8Panic(f'Memory: address "{hex(address)}" out of bounds')
+    def read_byte(self, address: int) -> int:
+        if not 0 <= address < len(self.data):
+            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
 
-    def set(self, address: int, value: int) -> int:
-        self._validate_address(address)
-        self.data[address] = value
-
-    def get(self, address: int) -> int:
-        self._validate_address(address)
         return self.data[address]
 
-    def read(self, address: int, length: int) -> list[int]:
-        self._validate_address(address + length)
-        return self.data[address:address + length]
+    def write_byte(self, address: int, value: int) -> None:
+        if not 0 <= address < len(self.data):
+            raise Chip8Panic(f'Memory write out of bounds: {hex(address)}')
 
-    def write(self, address: int, data: list[int]) -> None:
-        for offset, value in enumerate(data):
-            self.set(address + offset, value)
+        if not 0 <= value <= 0xFF:
+            raise Chip8Panic(f'Value {value} is not a valid byte (0-255)')
 
+        self.data[address] = value
+
+    def write(self, address: int, data: bytes | bytearray) -> None:
+        if not 0 <= address <= len(self.data) - len(data):
+            raise Chip8Panic('Memory write data outside memory bounds')
+
+        self.data[address:address + len(data)] = data
+
+    def read(self, address: int, length: int) -> bytearray:
+        if not 0 <= address <= len(self.data) - length:
+            raise Chip8Panic(f'Memory read out of bounds: {hex(address)} with length: {length}')
+
+        return bytearray(self.data[address:address + length])
 
 class Chip8:
     PROGRAM_START: int = 0x200
@@ -112,8 +118,8 @@ class Chip8:
 
     def fetch_opcode(self) -> int:
         # Since Chip8 uses 2 bytes opcodes, we are reading 2 bytes
-        high_byte = self.memory.get(self.counter)
-        low_byte = self.memory.get(self.counter + 1)
+        high_byte = self.memory.read_byte(self.counter)
+        low_byte = self.memory.read_byte(self.counter + 1)
 
         # Returning one "16-bit" integer from two read bytes
         return (high_byte << 8) | low_byte
