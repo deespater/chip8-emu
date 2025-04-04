@@ -1,4 +1,5 @@
 from .errors import Chip8Panic
+from .utils import parse_byte
 
 
 class Chip8Memory:
@@ -9,29 +10,28 @@ class Chip8Memory:
     def __init__(self) -> None:
         self.data = bytearray(self.SIZE)
 
-    def read_byte(self, address: int) -> int:
-        if not 0 <= address < len(self.data):
-            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
+    def _validate_address(self, address: int) -> None:
+        if not 0 <= address < self.SIZE:
+            raise Chip8Panic(f'Memory address out of bounds: {hex(address)}')
 
+    def read_byte(self, address: int) -> int:
+        self._validate_address(address)
         return self.data[address]
 
-    def write_byte(self, address: int, value: int) -> None:
-        if not 0 <= address < len(self.data):
-            raise Chip8Panic(f'Memory write out of bounds: {hex(address)}')
-
-        if not 0 <= value <= 0xFF:  # noqa: PLR2004 (checking that int is byte)
-            raise Chip8Panic(f'Value {value} is not a valid byte (0-255)')
-
-        self.data[address] = value
+    def write_byte(self, address: int, byte: int) -> None:
+        self._validate_address(address)
+        self.data[address] = parse_byte(byte)
 
     def write(self, address: int, data: bytes | bytearray) -> None:
-        if not 0 <= address <= len(self.data) - len(data):
-            raise Chip8Panic('Memory write data outside memory bounds')
-
-        self.data[address : address + len(data)] = data
+        # try:
+        for byte in data:
+            self.write_byte(address, byte)
+            address += 1
+        # except TypeError:
+        #     import pudb; pudb.set_trace()
 
     def read(self, address: int, length: int) -> bytearray:
-        if not 0 <= address <= len(self.data) - length:
-            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
-
-        return bytearray(self.data[address : address + length])
+        buffer = bytearray(length)
+        for i in range(length):
+            buffer[i] = self.read_byte(address + i)
+        return buffer
