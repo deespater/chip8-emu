@@ -1,6 +1,7 @@
 from .display import Chip8Display
 from .errors import Chip8Panic
 from .memory import Chip8Memory
+from .timers import DelayTimer, SoundTimer
 from .utils import parse_byte
 
 
@@ -34,11 +35,16 @@ class Chip8Registers:
 
 
 class Chip8:
+    FREQUENCY: int = 60  # Hz
+
     PROGRAM_START: int = 0x200
 
     display: Chip8Display
     memory: Chip8Memory
     registers: Chip8Registers
+
+    delay_timer: DelayTimer
+    sound_timer: SoundTimer
 
     counter: int
 
@@ -46,6 +52,9 @@ class Chip8:
         self.display = Chip8Display()
         self.memory = Chip8Memory()
         self.registers = Chip8Registers()
+
+        self.delay_timer = DelayTimer()
+        self.sound_timer = SoundTimer()
 
         # Setting CPU counter to the 512th byte on boot
         self.counter = self.PROGRAM_START
@@ -120,6 +129,27 @@ class Chip8:
 
                 # Rendering the sprite
                 self.display.draw_sprite(sprite_data, sprite_x, sprite_y)
+
+            case _ if opcode & 0xF0FF == 0xF007:  # noqa: PLR2004
+                # Fx07 - LD Vx, DT
+                # Set Vx = delay timer value.
+
+                # The value of DT is placed into Vx.
+                self.registers.set_v(x, self.delay_timer.value)
+
+            case _ if opcode & 0xF0FF == 0xF015:  # noqa: PLR2004
+                # Fx15 - LD DT, Vx
+                # Set delay timer = Vx.
+
+                # DT is set equal to the value of Vx.
+                self.delay_timer.update(self.registers.get_v(x))
+
+            case _ if opcode & 0xF0FF == 0xF018:  # noqa: PLR2004
+                # Fx18 - LD ST, Vx
+                # Set sound timer = Vx.
+
+                # ST is set equal to the value of Vx.
+                self.sound_timer.update(self.registers.get_v(x))
 
             case _:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
