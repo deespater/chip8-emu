@@ -50,7 +50,9 @@ def test_write_within_bounds():
 def test_write_out_of_bounds():
     memory = Chip8Memory()
     data = bytes([0x01, 0x02, 0x03])
-    with pytest.raises(Chip8Panic, match='Memory write data outside memory bounds'):
+
+    error_msg = 'Memory write data outside memory bounds'
+    with pytest.raises(Chip8Panic, match=error_msg):
         memory.write(0xFFF, data)
 
 
@@ -63,5 +65,7 @@ def test_read_within_bounds():
 
 def test_read_out_of_bounds():
     memory = Chip8Memory()
-    with pytest.raises(Chip8Panic, match='Memory read out of bounds: 0xfff with length: 3'):
+
+    error_msg = 'Memory read out of bounds: 0xfff with length: 3'
+    with pytest.raises(Chip8Panic, match=error_msg):
         memory.read(0xFFF, 3)

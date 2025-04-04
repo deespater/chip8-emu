@@ -19,7 +19,7 @@ class Chip8Memory:
         if not 0 <= address < len(self.data):
             raise Chip8Panic(f'Memory write out of bounds: {hex(address)}')
 
-        if not 0 <= value <= 0xFF:
+        if not 0 <= value <= 0xFF:  # noqa: PLR2004 (checking that int is byte)
             raise Chip8Panic(f'Value {value} is not a valid byte (0-255)')
 
         self.data[address] = value
@@ -28,10 +28,10 @@ class Chip8Memory:
         if not 0 <= address <= len(self.data) - len(data):
             raise Chip8Panic('Memory write data outside memory bounds')
 
-        self.data[address:address + len(data)] = data
+        self.data[address : address + len(data)] = data
 
     def read(self, address: int, length: int) -> bytearray:
         if not 0 <= address <= len(self.data) - length:
-            raise Chip8Panic(f'Memory read out of bounds: {hex(address)} with length: {length}')
+            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
 
-        return bytearray(self.data[address:address + length])
+        return bytearray(self.data[address : address + length])

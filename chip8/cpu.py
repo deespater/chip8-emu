@@ -1,14 +1,17 @@
+from pathlib import Path
+
 from .display import Chip8Display
 from .errors import Chip8Panic
 from .memory import Chip8Memory
+
 
 class Chip8Registers:
     V_SIZE: int = 16
 
     V: bytearray
-    I: int
+    I: int  # noqa: E741
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.V = bytearray(self.V_SIZE)
         self.I = 0
 
@@ -16,19 +19,18 @@ class Chip8Registers:
         if index >= self.V_SIZE:
             raise Chip8Panic(f'Registry V: index "{hex(index)}" out of bounds')
 
-
-    def setV(self, index: int, value: int) -> None:
+    def set_v(self, index: int, value: int) -> None:
         self._validate_index(index)
         self.V[index] = value
 
-    def getV(self, index: int) -> int:
+    def get_v(self, index: int) -> int:
         self._validate_index(index)
         return self.V[index]
 
-    def setI(self, value: int) -> None:
+    def set_i(self, value: int) -> None:
         self.I = value
 
-    def getI(self) -> int:
+    def get_i(self) -> int:
         return self.I
 
 
@@ -60,17 +62,15 @@ class Chip8:
     def load_rom(self, path: str) -> None:
         # Load a CHIP-8 ROM file into memory starting at 0x200
 
-        with open(path, 'rb') as rom_file:
-            rom_data = rom_file.read()
-            self.memory.write(self.PROGRAM_START, rom_data)
+        rom_data = Path(path).read_bytes()
+        self.memory.write(self.PROGRAM_START, rom_data)
 
     def execute_opcode(self, opcode: int) -> None:
         nnn = opcode & 0x0FFF       # Addr: Lowest 12 bits of the opcode
         n = opcode & 0x000F         # Nibble: Lowest 4 bits of the opcode
-        x = (opcode & 0x0F00) >> 8  # Register X: lower 4 bits of the high byte of the opcode
-        y = (opcode & 0x00F0) >> 4  # Register Y: upper 4 bits of the high byte of the opcode
-        kk = opcode & 0x00FF        # Immediate byte: the lowest 8 bits of the instruction
-
+        x = (opcode & 0x0F00) >> 8  # Register X: lower 4 bits of the high byte
+        y = (opcode & 0x00F0) >> 4  # Register Y: upper 4 bits of the high byte
+        kk = opcode & 0x00FF        # Immediate byte: the lowest 8 bits
 
         # LIST OF IMPLEMENTED OPCODES
         # https://devernay.free.fr/hacks/chip8/C8TECH10.HTM#3.1
@@ -80,54 +80,57 @@ class Chip8:
                 # Clear the display.
                 self.display.clear()
 
-            case _ if opcode & 0xF000 == 0x1000:
+            case _ if opcode & 0xF000 == 0x1000:  # noqa: PLR2004
                 # 1nnn - JP addr
                 # Jump to location nnn.
 
                 # The interpreter sets the program counter to nnn.
                 self.counter = nnn
 
-            case _ if opcode & 0xF000 == 0x6000:
+            case _ if opcode & 0xF000 == 0x6000:  # noqa: PLR2004
                 # 6xkk - LD Vx, byte
                 # Set Vx = kk.
 
                 # The interpreter puts the value kk into register Vx.
-                self.registers.setV(x, kk)
+                self.registers.set_v(x, kk)
 
-            case _ if opcode & 0xF000 == 0x7000:
+            case _ if opcode & 0xF000 == 0x7000:  # noqa: PLR2004
                 # 7xkk - ADD Vx, byte
                 # Set Vx = Vx + kk.
 
-                # Adds the value kk to the value of register Vx, then stores the result in Vx.
-                Vx = self.registers.getV(x)
-                self.registers.setV(x, Vx + kk)
+                # Adds the value kk to the value of register Vx,
+                # then stores the result in Vx.
+                vx = self.registers.get_v(x)
+                self.registers.set_v(x, vx + kk)
 
-            case _ if opcode & 0xF000 == 0xA000:
+            case _ if opcode & 0xF000 == 0xA000:  # noqa: PLR2004
                 # Annn - LD I, addr
                 # Set I = nnn.
 
                 # The value of register I is set to nnn.
-                self.registers.setI(nnn)
+                self.registers.set_i(nnn)
 
-            case _ if opcode & 0xF000 == 0xD000:
+            case _ if opcode & 0xF000 == 0xD000:  # noqa: PLR2004
                 # Dxyn - DRW Vx, Vy, nibble
-                # Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+                # Display n-byte sprite from memory location I at (Vx, Vy),
+                # set VF = collision.
 
-                # The interpreter reads n bytes from memory, starting at the address stored in I.
-                # These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
-                # Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1,
-                # otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display,
-                # it wraps around to the opposite side of the screen.
-                sprite_data = self.memory.read(self.registers.getI(), n)
-                sprite_x = self.registers.getV(x)
-                sprite_y = self.registers.getV(y)
+                # The interpreter reads n bytes from memory, starting at the
+                # address stored in I.These bytes are then displayed as sprites
+                # on screen at coordinates (Vx, Vy). Sprites are XORed onto
+                # the existing screen. If this causes any pixels to be erased,
+                # VF is set to 1, otherwise it is set to 0. If the sprite is
+                # positioned so part of it is outside the coordinates of the
+                # display, it wraps around to the opposite side of the screen.
+                sprite_data = self.memory.read(self.registers.get_i(), n)
+                sprite_x = self.registers.get_v(x)
+                sprite_y = self.registers.get_v(y)
 
                 # Rendering the sprite
                 self.display.draw_sprite(sprite_data, sprite_x, sprite_y)
 
             case _:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
-
 
     def tick(self) -> None:
         opcode = self.fetch_opcode()
