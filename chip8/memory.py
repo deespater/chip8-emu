@@ -10,27 +10,28 @@ class Chip8Memory:
     def __init__(self) -> None:
         self.data = bytearray(self.SIZE)
 
-    def _validate_address(self, address: int) -> None:
-        if not 0 <= address < self.SIZE:
-            raise Chip8Panic(f'Memory address out of bounds: {hex(address)}')
-
     def read_byte(self, address: int) -> int:
-        self._validate_address(address)
+        if not 0 <= address < self.SIZE:
+            raise Chip8Panic(f'Memory read out of bounds: {hex(address)}')
+
         return self.data[address]
 
     def write_byte(self, address: int, byte: int) -> None:
-        self._validate_address(address)
+        if not 0 <= address < self.SIZE:
+            raise Chip8Panic(f'Memory write out of bounds: {hex(address)}')
+
         self.data[address] = parse_byte(byte)
 
     def write(self, address: int, data: bytes | bytearray) -> None:
-        # try:
-        for byte in data:
-            self.write_byte(address, byte)
-            address += 1
-        # except TypeError:
-        #     import pudb; pudb.set_trace()
+        if not 0 <= address + len(data) < self.SIZE:
+            raise Chip8Panic(f'Memory write out of bounds: {hex(self.SIZE)}')
+
+        self.data[address:address + len(data)] = data
 
     def read(self, address: int, length: int) -> bytearray:
+        if not 0 <= address + length < self.SIZE:
+            raise Chip8Panic(f'Memory read out of bounds: {hex(self.SIZE)}')
+
         buffer = bytearray(length)
         for i in range(length):
             buffer[i] = self.read_byte(address + i)

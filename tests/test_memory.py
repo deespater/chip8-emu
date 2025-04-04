@@ -21,7 +21,7 @@ def test_read_byte_within_bounds(chip8_memory):
 
 
 def test_read_byte_out_of_bounds(chip8_memory):
-    error_msg = 'Memory address out of bounds: 0x2000'
+    error_msg = 'Memory read out of bounds: 0x2000'
     with pytest.raises(Chip8Panic, match=error_msg):
         chip8_memory.read_byte(0x2000)
 
@@ -32,7 +32,7 @@ def test_write_byte_within_bounds(chip8_memory):
 
 
 def test_write_byte_out_of_bounds(chip8_memory):
-    error_msg = 'Memory address out of bounds: 0x1000'
+    error_msg = 'Memory write out of bounds: 0x1000'
     with pytest.raises(Chip8Panic, match=error_msg):
         chip8_memory.write_byte(0x1000, 0xEF)
 
@@ -52,7 +52,7 @@ def test_write_within_bounds(chip8_memory):
 def test_write_out_of_bounds(chip8_memory):
     data = bytes([0x01, 0x02, 0x03])
 
-    error_msg = 'Memory address out of bounds: 0x1000'
+    error_msg = 'Memory write out of bounds: 0x1000'
     with pytest.raises(Chip8Panic, match=error_msg):
         chip8_memory.write(0xFFF, data)
 
@@ -64,6 +64,6 @@ def test_read_within_bounds(chip8_memory):
 
 
 def test_read_out_of_bounds(chip8_memory):
-    error_msg = 'Memory address out of bounds: 0x1000'
+    error_msg = 'Memory read out of bounds: 0x1000'
     with pytest.raises(Chip8Panic, match=error_msg):
         chip8_memory.read(0xFFF, 3)
