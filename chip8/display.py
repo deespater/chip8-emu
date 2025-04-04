@@ -2,6 +2,9 @@ class Chip8Display:
     WIDTH: int = 64
     HEIGHT: int = 32
 
+    ASCII_CLEAR: str = '\033[H'
+    PIXEL_CHAR: str = '▓'
+
     memory: list[bytearray]
 
     def __init__(self) -> None:
@@ -14,7 +17,6 @@ class Chip8Display:
         sprite_y: int,
     ) -> None:
         """Setting sprite data to display memory"""
-
         for row_index, sprite_row_bytes in enumerate(sprite_data):
             # Length of sprite_data is the height of sprite so we iterating
             # each row of sprite
@@ -33,6 +35,13 @@ class Chip8Display:
 
     def render(self) -> None:
         """Rendering display memory to the screen"""
-        print('\033[H', end='')  # ANSI clear screen
+        print(self.ASCII_CLEAR, end='')  # ANSI clear screen
+
+        # Rendering all pixels into buffer list
+        buffer: list[str] = []
         for row in self.memory:
-            print(''.join('▓' if pixel else ' ' for pixel in row))
+            row_pixels = [ self.PIXEL_CHAR if pixel else ' ' for pixel in row ]
+            buffer.append(''.join(row_pixels))
+
+        # Rendering each row in a new line except the last one
+        print('\n'.join(buffer), end='')
