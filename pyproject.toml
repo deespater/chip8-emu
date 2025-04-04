@@ -20,6 +20,7 @@ python = "^3.13"
 pudb = "^2024.1.3"
 pytest = "^8.3.5"
 pytest-cov = "^6.1.0"
+ruff = "^0.11.3"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -35,3 +36,48 @@ exclude_lines = ["pragma: no cover"]
 
 [tool.coverage.html]
 directory = ".coverage_report"
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 20
+quote-style = "single"
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "I",     # isort
+    "F",     # pyflakes
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "N",     # PEP8 naming
+    "UP",    # pyupgrade
+    "PL",    # pylint
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "T10",   # flake8-debugger
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "PIE",   # flake8-pie
+    "PT",    # flake8-pytest-style
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "TD",    # flake8-todos
+    "PERF",  # Perflint
+    "FURB",  # REFURB
+    "RUF",   # Ruff specific rules
+]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true  # Allows ANY for args/kwargs
