@@ -81,21 +81,21 @@ class Chip8:
                 # Clear the display.
                 self.display.clear()
 
-            case _ if opcode & 0xF000 == 0x1000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0x1000:
                 # 1nnn - JP addr
                 # Jump to location nnn.
 
                 # The interpreter sets the program counter to nnn.
                 self.counter = nnn
 
-            case _ if opcode & 0xF000 == 0x6000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0x6000:
                 # 6xkk - LD Vx, byte
                 # Set Vx = kk.
 
                 # The interpreter puts the value kk into register Vx.
                 self.registers.set_v(x, kk)
 
-            case _ if opcode & 0xF000 == 0x7000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0x7000:
                 # 7xkk - ADD Vx, byte
                 # Set Vx = Vx + kk.
 
@@ -104,14 +104,14 @@ class Chip8:
                 vx = self.registers.get_v(x)
                 self.registers.set_v(x, vx + kk)
 
-            case _ if opcode & 0xF000 == 0xA000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0xA000:
                 # Annn - LD I, addr
                 # Set I = nnn.
 
                 # The value of register I is set to nnn.
                 self.registers.set_i(nnn)
 
-            case _ if opcode & 0xF000 == 0xD000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0xD000:
                 # Dxyn - DRW Vx, Vy, nibble
                 # Display n-byte sprite from memory location I at (Vx, Vy),
                 # set VF = collision.
@@ -130,28 +130,28 @@ class Chip8:
                 # Rendering the sprite
                 self.display.draw_sprite(sprite_data, sprite_x, sprite_y)
 
-            case _ if opcode & 0xF0FF == 0xF007:  # noqa: PLR2004
+            case _ if opcode & 0xF0FF == 0xF007:
                 # Fx07 - LD Vx, DT
                 # Set Vx = delay timer value.
 
                 # The value of DT is placed into Vx.
                 self.registers.set_v(x, self.delay_timer.value)
 
-            case _ if opcode & 0xF0FF == 0xF015:  # noqa: PLR2004
+            case _ if opcode & 0xF0FF == 0xF015:
                 # Fx15 - LD DT, Vx
                 # Set delay timer = Vx.
 
                 # DT is set equal to the value of Vx.
                 self.delay_timer.update(self.registers.get_v(x))
 
-            case _ if opcode & 0xF0FF == 0xF018:  # noqa: PLR2004
+            case _ if opcode & 0xF0FF == 0xF018:
                 # Fx18 - LD ST, Vx
                 # Set sound timer = Vx.
 
                 # ST is set equal to the value of Vx.
                 self.sound_timer.update(self.registers.get_v(x))
 
-            case _ if opcode & 0xF000 == 0x4000:  # noqa: PLR2004
+            case _ if opcode & 0xF000 == 0x4000:
                 # 4xkk - SNE Vx, byte
                 # Skip next instruction if Vx != kk.
 
@@ -160,7 +160,7 @@ class Chip8:
                 if self.registers.get_v(x) != kk:
                     self.counter += 2
 
-            case _ if opcode & 0xF00F == 0x8004:  # noqa: PLR2004
+            case _ if opcode & 0xF00F == 0x8004:
                 # 8xy4 - ADD Vx, Vy
                 # Set Vx = Vx + Vy, set VF = carry.
 

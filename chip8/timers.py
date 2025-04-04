@@ -8,7 +8,7 @@ class QuartzClock:
 
     time_of_last_tick: float
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.time_of_last_tick = time.time()
 
     def synchronize(self) -> None:
@@ -26,7 +26,7 @@ class QuartzClock:
 class Chip8Timer(QuartzClock):
     value: int
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = 0
 

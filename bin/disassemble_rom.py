@@ -11,25 +11,25 @@ def get_opcode_name(opcode: int) -> str:
     match opcode:
         case 0x00E0:
             return '00E0 - CLS'
-        case _ if opcode & 0xF000 == 0x1000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0x1000:
             return f'1nnn - JP {nnn:04x}'
-        case _ if opcode & 0xF000 == 0x6000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0x6000:
             return f'6xkk - LD V{x}, {kk}'
-        case _ if opcode & 0xF000 == 0x7000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0x7000:
             return f'7xkk - ADD V{x}, {kk}'
-        case _ if opcode & 0xF000 == 0xA000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0xA000:
             return f'Annn - LD I, {nnn}'
-        case _ if opcode & 0xF000 == 0xD000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0xD000:
             return f'Dxyn - DRW V{x}, V{y}, {n}'
-        case _ if opcode & 0xF0FF == 0xF007:  # noqa: PLR2004
+        case _ if opcode & 0xF0FF == 0xF007:
             return f'Fx07 - LD V{x}, DT'
-        case _ if opcode & 0xF0FF == 0xF015:  # noqa: PLR2004
+        case _ if opcode & 0xF0FF == 0xF015:
             return f'Fx15 - LD DT, V{x}'
-        case _ if opcode & 0xF0FF == 0xF018:  # noqa: PLR2004
+        case _ if opcode & 0xF0FF == 0xF018:
             return f'Fx18 - LD ST, V{x}'
-        case _ if opcode & 0xF000 == 0x4000:  # noqa: PLR2004
+        case _ if opcode & 0xF000 == 0x4000:
             return f'4xkk - SNE V{x}, {kk}'
-        case _ if opcode & 0xF00F == 0x8004:  # noqa: PLR2004
+        case _ if opcode & 0xF00F == 0x8004:
             return f'8xy4 - ADD V{x}, V{y}'
         case _:
             return f'Unknown opcode: "{hex(opcode)}"'
