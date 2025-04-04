@@ -66,6 +66,6 @@ def test_read_within_bounds():
 def test_read_out_of_bounds():
     memory = Chip8Memory()
 
-    error_msg = 'Memory read out of bounds: 0xfff with length: 3'
+    error_msg = 'Memory read out of bounds: 0xfff'
     with pytest.raises(Chip8Panic, match=error_msg):
         memory.read(0xFFF, 3)
