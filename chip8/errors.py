@@ -1,2 +1,2 @@
-class Chip8Panic(Exception):
+class Chip8Panic(Exception):  # noqa: N818
     pass

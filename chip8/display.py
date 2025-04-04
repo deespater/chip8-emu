@@ -40,7 +40,7 @@ class Chip8Display:
         # Rendering all pixels into buffer list
         buffer: list[str] = []
         for row in self.memory:
-            row_pixels = [ self.PIXEL_CHAR if pixel else ' ' for pixel in row ]
+            row_pixels = [self.PIXEL_CHAR if pixel else ' ' for pixel in row]
             buffer.append(''.join(row_pixels))
 
         # Rendering each row in a new line except the last one
