@@ -3,5 +3,6 @@
 .venv/
 .vscode/
 .coverage_report/
+.ruff_cache/
 .tool-versions
 .coverage

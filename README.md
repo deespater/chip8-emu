@@ -1,3 +1,7 @@
+### Known "out-of-spec" implementation
+- CHIP-8 has it's own VRAM and does not use 4kb or RAM
+
+
 ### CHIP-8 instructions implementation progress
 
 - [ ] 0nnn - SYS addr: Jump to a machine code routine at nnn

@@ -11,7 +11,7 @@ def clear_screen() -> None:
 if __name__ == '__main__':
     chip = Chip8()
 
-    rom_data = Path('./IBM Logo.ch8').read_bytes()
+    rom_data = Path('./dummy.bin').read_bytes()
     chip.memory.write(chip.PROGRAM_START, rom_data)
 
     try:
