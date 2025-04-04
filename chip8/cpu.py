@@ -6,32 +6,42 @@ from .memory import Chip8Memory
 
 
 class Chip8Registers:
-    V_SIZE: int = 16
+    V_SIZE: int = 16  # Amount of 8-bit registers (V0 to VF)
 
-    V: bytearray
-    I: int  # noqa: E741
+    v: bytearray  # 16 x 8-bit data register: V0 to VF
+    i: int  # 16 bit address register noqa: E741
 
     def __init__(self) -> None:
-        self.V = bytearray(self.V_SIZE)
-        self.I = 0
+        self.v = bytearray(self.V_SIZE)
+        self.i = 0
 
-    def _validate_index(self, index: int) -> None:
-        if index >= self.V_SIZE:
-            raise Chip8Panic(f'Registry V: index "{hex(index)}" out of bounds')
+    def _validate_v_index(self, index: int) -> None:
+        if not 0 <= index < self.V_SIZE:
+            raise Chip8Panic(f'V register index out of bounds: {index}')
+
+    def _validate_byte(self, value: int, length: int = 1) -> None:
+        # Max value based on length: 1 byte = 0...255, 2 bytes = 0..65535
+        max_value = (1 << (8 * length)) - 1
+        if not 0 <= value <= max_value:
+            raise Chip8Panic(f'Value {value} is not valid for {length} byte(s) (0-{max_value})')
 
     def set_v(self, index: int, value: int) -> None:
-        self._validate_index(index)
-        self.V[index] = value
+        self._validate_v_index(index)
+        self._validate_byte(value)
+
+        self.v[index] = value
 
     def get_v(self, index: int) -> int:
-        self._validate_index(index)
-        return self.V[index]
+        self._validate_v_index(index)
+
+        return self.v[index]
 
     def set_i(self, value: int) -> None:
-        self.I = value
+        self._validate_byte(value, length=2)
+        self.i = value
 
     def get_i(self) -> int:
-        return self.I
+        return self.i
 
 
 class Chip8:
