@@ -88,4 +88,5 @@ allow-star-arg-any = true  # Allows ANY for args/kwargs
     "S101",    # assert
     "ANN",     # flake8-annotations
     "PLR2004", # magic-value-comparison
+    "N802",    # invalid-function-name
 ]

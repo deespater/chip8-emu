@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from .display import Chip8Display
 from .errors import Chip8Panic
 from .memory import Chip8Memory
@@ -54,8 +52,7 @@ class Chip8:
 
     def fetch_opcode(self) -> int:
         # Since Chip8 uses 2 bytes opcodes, we are reading 2 bytes
-        high_byte = self.memory.read_byte(self.counter)
-        low_byte = self.memory.read_byte(self.counter + 1)
+        [ high_byte, low_byte ] = self.memory.read(self.counter, 2)
 
         # Returning one "16-bit" integer from two read bytes
         return (high_byte << 8) | low_byte

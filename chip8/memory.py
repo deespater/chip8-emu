@@ -26,7 +26,7 @@ class Chip8Memory:
         if not 0 <= address + len(data) < self.SIZE:
             raise Chip8Panic(f'Memory write out of bounds: {hex(self.SIZE)}')
 
-        self.data[address:address + len(data)] = data
+        self.data[address : address + len(data)] = data
 
     def read(self, address: int, length: int) -> bytearray:
         if not 0 <= address + length < self.SIZE:

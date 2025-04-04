@@ -1,15 +1,52 @@
+from functools import partial
+
 import pytest
 
 from chip8.cpu import Chip8, Chip8Registers
+from chip8.display import Chip8Display
 from chip8.errors import Chip8Panic
 from chip8.memory import Chip8Memory
-from chip8.display import Chip8Display
 
 
 @pytest.fixture
 def chip8():
     """Fixture to create a Chip8 instance for testing."""
     return Chip8()
+
+
+def test_chip8_registers_initialization(chip8):
+    assert len(chip8.registers.v) == Chip8Registers.V_SIZE
+
+    # Check if all registers are initialized to 0
+    assert chip8.registers.i == 0
+    for i in range(Chip8Registers.V_SIZE):
+        assert chip8.registers.v[i] == 0
+
+
+def test_chip8_registers_set_v(chip8):
+    chip8.registers.set_v(0, 0xAB)
+    assert chip8.registers.v[0] == 0xAB
+
+
+def test_chip8_registers_set_v_out_of_bounds(chip8):
+    with pytest.raises(Chip8Panic, match='V register index out of bounds: 16'):
+        chip8.registers.set_v(Chip8Registers.V_SIZE, 0xFF)
+
+
+def test_chip8_registers_set_v_invalid_value(chip8):
+    with pytest.raises(Chip8Panic, match='300 is not valid for 1 byte'):
+        chip8.registers.set_v(1, 300)
+
+
+def test_chip8_registers_get_v(chip8):
+    chip8.registers.v[1] = 0xAB
+    assert chip8.registers.get_v(1) == 0xAB
+
+
+def test_chip8_registers_get_v_out_of_bounds(chip8):
+    with pytest.raises(Chip8Panic, match='V register index out of bounds: 16'):
+        chip8.registers.get_v(Chip8Registers.V_SIZE)
+
 
 def test_chip8_initialization(chip8):
     assert chip8.counter == 0x200
@@ -26,13 +63,14 @@ def test_chip8_fetch_opcode(chip8):
     assert opcode == 0x1234
 
 
-### Opcode Tests ###
+# Opcode Tests ###
 def test_chip8_execute_opcode_00E0(chip8, mocker):
     mocker.patch.object(chip8.display, 'clear')
     chip8.execute_opcode(0x00E0)
 
     # Check if the display clear method was called
     assert chip8.display.clear.called
+
 
 def test_chip8_execute_opcode_1nnn(chip8):
     chip8.execute_opcode(0x1234)
@@ -77,7 +115,8 @@ def test_chip8_execute_opcode_Dxyn(chip8, mocker):
 
     chip8.execute_opcode(0xD232)  # Draw sprite at (V2, V3) with height 2
 
-    # Check if the display draw_sprite method was called with the correct parameters
+    # Check if the display draw_sprite method was called with the
+    # correct parameters
     assert chip8.display.draw_sprite.called
     args, _ = chip8.display.draw_sprite.call_args
     assert args[0] == sprite_data
@@ -100,3 +139,22 @@ def test_chip8_tick(chip8, mocker):
     assert chip8.counter == chip8.PROGRAM_START + 2
     assert chip8.execute_opcode.called
     assert chip8.display.render.called
+
+
+def test_chip8_run(chip8, mocker):
+    # Tests the run method by simulating a few ticks
+    ticks_counter = 0
+
+    def self_destructing_tick(_self):
+        nonlocal ticks_counter
+        if ticks_counter == 5:
+            # Simulate stopping the infinite loop
+            raise KeyboardInterrupt
+        ticks_counter += 1
+
+    mocker.patch.object(chip8, 'tick', partial(self_destructing_tick, chip8))
+
+    with pytest.raises(KeyboardInterrupt):
+        chip8.run()
+
+    assert ticks_counter == 5
