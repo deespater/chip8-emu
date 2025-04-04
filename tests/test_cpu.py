@@ -130,6 +130,7 @@ def test_chip8_execute_opcode_Fx07(chip8, mocker):
 
     assert chip8.registers.get_v(4) == 0xFF
 
+
 def test_chip8_execute_opcode_Fx15(chip8, mocker):
     mocked_timer_method = mocker.patch.object(chip8.delay_timer, 'update')
     chip8.registers.set_v(7, 0xAB)
@@ -139,6 +140,7 @@ def test_chip8_execute_opcode_Fx15(chip8, mocker):
     args, _ = mocked_timer_method.call_args
     assert args[0] == 0xAB
 
+
 def test_chip8_execute_opcode_Fx18(chip8, mocker):
     mocked_timer_method = mocker.patch.object(chip8.sound_timer, 'update')
     chip8.registers.set_v(5, 0xDD)
@@ -147,6 +149,7 @@ def test_chip8_execute_opcode_Fx18(chip8, mocker):
     assert mocked_timer_method.called
     args, _ = mocked_timer_method.call_args
     assert args[0] == 0xDD
+
 
 @pytest.mark.parametrize(('v_index', 'v_value', 'opcode', 'offset'), [
     (0, 0x01, 0x40FF, 2),  # V0 != 0xFF
@@ -161,6 +164,21 @@ def test_chip8_execute_opcode_4xkk(v_index, v_value, opcode, offset, chip8):
     chip8.execute_opcode(opcode)
 
     assert counter_before_opcode + offset == chip8.counter
+
+
+@pytest.mark.parametrize(('vx', 'vy', 'expected_vx', 'expected_carry'), [
+    (0x01, 0x01, 0x02, 0x00),  # No carry
+    (0xFF, 0x01, 0x00, 0x01),  # Carry occurs
+    (0x0F, 0xF1, 0x00, 0x01),  # Carry occurs
+    (0x10, 0x20, 0x30, 0x00),  # No carry
+])
+def test_chip8_execute_opcode_8004(vx, vy, expected_vx, expected_carry, chip8):
+    chip8.registers.set_v(4, vx)
+    chip8.registers.set_v(5, vy)
+    chip8.execute_opcode(0x8454)  # Add V1 to V0, store result in V0
+
+    assert chip8.registers.get_v(4) == expected_vx
+    assert chip8.registers.get_v(0xF) == expected_carry
 
 
 def test_chip8_execute_opcode_unknown(chip8):

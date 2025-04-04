@@ -160,6 +160,24 @@ class Chip8:
                 if self.registers.get_v(x) != kk:
                     self.counter += 2
 
+            case _ if opcode & 0xF00F == 0x8004:  # noqa: PLR2004
+                # 8xy4 - ADD Vx, Vy
+                # Set Vx = Vx + Vy, set VF = carry.
+
+                # The values of Vx and Vy are added together. If the result
+                # is greater than 8 bits (i.e., > 255,) VF is set to 1,
+                # otherwise 0. Only the lowest 8 bits of the result are kept,
+                # and stored in Vx.
+                vx = self.registers.get_v(x)
+                vy = self.registers.get_v(y)
+                result = vx + vy
+
+                # Store the result in Vx, keeping only the lowest 8 bits
+                self.registers.set_v(x, result & 0xFF)
+
+                # Set VF to 1 if there is a carry, otherwise set it to 0
+                self.registers.set_v(0xF, 1 if result > 0xFF else 0)
+
             case _:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
 
