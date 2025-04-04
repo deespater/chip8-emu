@@ -31,6 +31,8 @@ def get_opcode_name(opcode: int) -> str:
             return f'4xkk - SNE V{x}, {kk}'
         case _ if opcode & 0xF00F == 0x8004:
             return f'8xy4 - ADD V{x}, V{y}'
+        case _ if opcode & 0xF0FF == 0xF00A:
+            return f'Fx0A - LD V{x}, K'
         case _:
             return f'Unknown opcode: "{hex(opcode)}"'
 

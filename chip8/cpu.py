@@ -1,5 +1,6 @@
 from .display import Chip8Display
 from .errors import Chip8Panic
+from .input import Chip8Keyboard
 from .memory import Chip8Memory
 from .timers import DelayTimer, SoundTimer
 from .utils import parse_byte
@@ -40,6 +41,7 @@ class Chip8:
     PROGRAM_START: int = 0x200
 
     display: Chip8Display
+    keyboard: Chip8Keyboard
     memory: Chip8Memory
     registers: Chip8Registers
 
@@ -55,6 +57,8 @@ class Chip8:
 
         self.delay_timer = DelayTimer()
         self.sound_timer = SoundTimer()
+
+        self.keyboard = Chip8Keyboard()
 
         # Setting CPU counter to the 512th byte on boot
         self.counter = self.PROGRAM_START
@@ -178,15 +182,42 @@ class Chip8:
                 # Set VF to 1 if there is a carry, otherwise set it to 0
                 self.registers.set_v(0xF, 1 if result > 0xFF else 0)
 
+            case _ if opcode & 0xF0FF == 0xF00A:
+                # Fx0A - LD Vx, K
+                # Wait for a key press, store the value of the key in Vx.
+
+                # All execution stops until a key is pressed, then the value
+                # of that key is stored in Vx.
+
+                # If key was captured, store the key value in Vx
+                if captured_key := self.keyboard.get_captured_key():
+                    self.registers.set_v(x, captured_key)
+
+                # Keep staying in the same opcode
+                # and wait for a key press to be captured
+                else:
+                    self.counter -= 2  # We decrement to stay in the same opcode
+                    self.keyboard.wait_for_input()
+
             case _:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
 
     def tick(self) -> None:
+        # Syncronizing timers clock
+        self.delay_timer.synchronize()
+        # self.sound_timer.synchronize()
+
+        # Synchonizing keyboard clock
+        self.keyboard.synchronize()
+
+        # Fetching opcode and incrementing the counter
         opcode = self.fetch_opcode()
         self.counter += 2
 
+        # Executing opcode
         self.execute_opcode(opcode)
 
+        # Rendering VRAM on screen
         self.display.render()
 
     def run(self) -> None:
