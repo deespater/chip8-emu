@@ -60,12 +60,6 @@ class Chip8:
         # Returning one "16-bit" integer from two read bytes
         return (high_byte << 8) | low_byte
 
-    def load_rom(self, path: str) -> None:
-        # Load a CHIP-8 ROM file into memory starting at 0x200
-
-        rom_data = Path(path).read_bytes()
-        self.memory.write(self.PROGRAM_START, rom_data)
-
     def execute_opcode(self, opcode: int) -> None:
         nnn = opcode & 0x0FFF       # Addr: Lowest 12 bits of the opcode
         n = opcode & 0x000F         # Nibble: Lowest 4 bits of the opcode

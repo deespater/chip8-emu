@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from chip8 import Chip8
 
@@ -8,13 +9,13 @@ def clear_screen() -> None:
 
 
 if __name__ == '__main__':
-    # Clear terminal on start
-    clear_screen()
-
     chip = Chip8()
-    chip.load_rom('./IBM Logo.ch8')  # Replace with your ROM path
+
+    rom_data = Path('./IBM Logo.ch8').read_bytes()
+    chip.memory.write(chip.PROGRAM_START, rom_data)
 
     try:
+        clear_screen()
         chip.run()
     except KeyboardInterrupt:
         clear_screen()
