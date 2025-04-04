@@ -18,4 +18,20 @@ python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 pudb = "^2024.1.3"
+pytest = "^8.3.5"
+pytest-cov = "^6.1.0"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=chip8 --cov-report=html"
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover"]
+
+[tool.coverage.html]
+directory = ".coverage_report"
