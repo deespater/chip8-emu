@@ -5,7 +5,7 @@ class Chip8Display:
     ASCII_CLEAR: str = '\033[H'
     PIXEL_CHAR: str = '▓'
 
-    memory: list[bytearray]
+    pixels: list[bytearray]
 
     def __init__(self) -> None:
         self.clear()
@@ -27,11 +27,11 @@ class Chip8Display:
                 dy = (sprite_y + row_index) % self.HEIGHT
 
                 sprite_pixel = (sprite_row_bytes >> (7 - column_index)) & 1
-                self.memory[dy][dx] = sprite_pixel
+                self.pixels[dy][dx] = sprite_pixel
 
     def clear(self) -> None:
         """Clearing memory and setting it to 0"""
-        self.memory = [bytearray(self.WIDTH) for _ in range(self.HEIGHT)]
+        self.pixels = [bytearray(self.WIDTH) for _ in range(self.HEIGHT)]
 
     def render(self) -> None:
         """Rendering display memory to the screen"""
@@ -39,7 +39,7 @@ class Chip8Display:
 
         # Rendering all pixels into buffer list
         buffer: list[str] = []
-        for row in self.memory:
+        for row in self.pixels:
             row_pixels = [self.PIXEL_CHAR if pixel else ' ' for pixel in row]
             buffer.append(''.join(row_pixels))
 
