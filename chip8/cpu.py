@@ -151,6 +151,15 @@ class Chip8:
                 # ST is set equal to the value of Vx.
                 self.sound_timer.update(self.registers.get_v(x))
 
+            case _ if opcode & 0xF000 == 0x4000:  # noqa: PLR2004
+                # 4xkk - SNE Vx, byte
+                # Skip next instruction if Vx != kk.
+
+                # The interpreter compares register Vx to kk, and if they are
+                # not equal, increments the program counter by 2.
+                if self.registers.get_v(x) != kk:
+                    self.counter += 2
+
             case _:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
 

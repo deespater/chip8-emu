@@ -148,6 +148,20 @@ def test_chip8_execute_opcode_Fx18(chip8, mocker):
     args, _ = mocked_timer_method.call_args
     assert args[0] == 0xDD
 
+@pytest.mark.parametrize(('v_index', 'v_value', 'opcode', 'offset'), [
+    (0, 0x01, 0x40FF, 2),  # V0 != 0xFF
+    (0, 0xFF, 0x40FF, 0),  # V0 == 0xFF
+    (1, 0x01, 0x40FF, 2),  # V1 != 0xFF
+    (1, 0xFF, 0x41FF, 0),  # V1 == 0xFF
+])
+def test_chip8_execute_opcode_4xkk(v_index, v_value, opcode, offset, chip8):
+    counter_before_opcode = chip8.counter
+
+    chip8.registers.set_v(v_index, v_value)
+    chip8.execute_opcode(opcode)
+
+    assert counter_before_opcode + offset == chip8.counter
+
 
 def test_chip8_execute_opcode_unknown(chip8):
     with pytest.raises(Chip8Panic, match='Unknown opcode "0xffff"'):

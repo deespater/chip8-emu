@@ -27,6 +27,8 @@ def get_opcode_name(opcode: int) -> str:
             return f'Fx15 - LD DT, V{x}'
         case _ if opcode & 0xF0FF == 0xF018:  # noqa: PLR2004
             return f'Fx18 - LD ST, V{x}'
+        case _ if opcode & 0xF000 == 0x4000:  # noqa: PLR2004
+            return f'4xkk - SNE V{x}, {kk}'
         case _:
             return f'Unknown opcode: "{hex(opcode)}"'
 
