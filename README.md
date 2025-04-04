@@ -10,7 +10,7 @@
 - [x] 1nnn - JP addr: Jump to location nnn
 - [ ] 2nnn - CALL addr: Call subroutine at nnn
 - [ ] 3xkk - SE Vx, byte: Skip next instruction if Vx = kk
-- [ ] 4xkk - SNE Vx, byte: Skip next instruction if Vx != kk
+- [x] 4xkk - SNE Vx, byte: Skip next instruction if Vx != kk
 - [ ] 5xy0 - SE Vx, Vy: Skip next instruction if Vx = Vy
 - [x] 6xkk - LD Vx, byte: Set Vx = kk
 - [x] 7xkk - ADD Vx, byte: Set Vx = Vx + kk
@@ -18,7 +18,7 @@
 - [ ] 8xy1 - OR Vx, Vy: Set Vx = Vx OR Vy
 - [ ] 8xy2 - AND Vx, Vy: Set Vx = Vx AND Vy
 - [ ] 8xy3 - XOR Vx, Vy: Set Vx = Vx XOR Vy
-- [ ] 8xy4 - ADD Vx, Vy: Set Vx = Vx + Vy, set VF = carry
+- [x] 8xy4 - ADD Vx, Vy: Set Vx = Vx + Vy, set VF = carry
 - [ ] 8xy5 - SUB Vx, Vy: Set Vx = Vx - Vy, set VF = NOT borrow
 - [ ] 8xy6 - SHR Vx {, Vy}: Set Vx = Vx SHR 1
 - [ ] 8xy7 - SUBN Vx, Vy: Set Vx = Vy - Vx, set VF = NOT borrow
