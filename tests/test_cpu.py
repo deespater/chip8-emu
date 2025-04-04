@@ -124,6 +124,31 @@ def test_chip8_execute_opcode_Dxyn(chip8, mocker):
     assert args[2] == sprite_y
 
 
+def test_chip8_execute_opcode_Fx07(chip8, mocker):
+    mocker.patch.object(chip8.delay_timer, 'value', 0xFF)
+    chip8.execute_opcode(0xF407)  # Set V4 = delay timer value of 0xFF
+
+    assert chip8.registers.get_v(4) == 0xFF
+
+def test_chip8_execute_opcode_Fx15(chip8, mocker):
+    mocked_timer_method = mocker.patch.object(chip8.delay_timer, 'update')
+    chip8.registers.set_v(7, 0xAB)
+    chip8.execute_opcode(0xF715)  # Set delay timer value = V7 value (0xAB)
+
+    assert mocked_timer_method.called
+    args, _ = mocked_timer_method.call_args
+    assert args[0] == 0xAB
+
+def test_chip8_execute_opcode_Fx18(chip8, mocker):
+    mocked_timer_method = mocker.patch.object(chip8.sound_timer, 'update')
+    chip8.registers.set_v(5, 0xDD)
+    chip8.execute_opcode(0xF518)  # Set sound timer value = V5 value (0xDD)
+
+    assert mocked_timer_method.called
+    args, _ = mocked_timer_method.call_args
+    assert args[0] == 0xDD
+
+
 def test_chip8_execute_opcode_unknown(chip8):
     with pytest.raises(Chip8Panic, match='Unknown opcode "0xffff"'):
         chip8.execute_opcode(0xFFFF)
