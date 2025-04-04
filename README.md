@@ -30,10 +30,10 @@
 - [x] Dxyn - DRW Vx, Vy, nibble: Display n-byte sprite
 - [ ] Ex9E - SKP Vx: Skip next instruction if key with the value of Vx is pressed
 - [ ] ExA1 - SKNP Vx: Skip next instruction if key with the value of Vx is not pressed
-- [ ] Fx07 - LD Vx, DT: Set Vx = delay timer value
+- [x] Fx07 - LD Vx, DT: Set Vx = delay timer value
 - [ ] Fx0A - LD Vx, K: Wait for a key press, store the value of the key in Vx
-- [ ] Fx15 - LD DT, Vx: Set delay timer = Vx
-- [ ] Fx18 - LD ST, Vx: Set sound timer = Vx
+- [x] Fx15 - LD DT, Vx: Set delay timer = Vx
+- [x] Fx18 - LD ST, Vx: Set sound timer = Vx
 - [ ] Fx1E - ADD I, Vx: Set I = I + Vx
 - [ ] Fx29 - LD F, Vx: Set I = location of sprite for digit Vx
 - [ ] Fx33 - LD B, Vx: Store BCD representation of Vx in memory locations I, I+1, and I+2
