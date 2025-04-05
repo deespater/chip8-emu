@@ -101,7 +101,8 @@ def test_chip8_execute_opcode_Annn(chip8):
 
 
 def test_chip8_execute_opcode_Dxyn(chip8, mocker):
-    mocker.patch.object(chip8.display, 'draw_sprite')
+    # Mocked method returns no collision flag
+    mocker.patch.object(chip8.display, 'draw_sprite', return_value=False)
 
     sprite_offset = 0x300
     sprite_data = bytes([0b11110011, 0b00001100])
@@ -122,6 +123,36 @@ def test_chip8_execute_opcode_Dxyn(chip8, mocker):
     assert args[0] == sprite_data
     assert args[1] == sprite_x
     assert args[2] == sprite_y
+
+    # Check if VF is set to 0 due to no collision
+    assert chip8.registers.get_v(0xF) == 0
+
+
+def test_chip8_execute_opcode_Dxyn_with_collision(chip8, mocker):
+    # Mocked method returns collision flag
+    mocker.patch.object(chip8.display, 'draw_sprite', return_value=True)  # Simulate collision
+
+    sprite_offset = 0x300
+    sprite_data = bytes([0b11110011, 0b00001100])
+    sprite_x = 0x04
+    sprite_y = 0x04
+
+    chip8.registers.set_i(sprite_offset)
+    chip8.memory.write(sprite_offset, sprite_data)
+    chip8.registers.set_v(2, sprite_x)
+    chip8.registers.set_v(3, sprite_y)
+
+    chip8.execute_opcode(0xD232)  # Draw sprite at (V2, V3) with height 2
+
+    # Check if the display draw_sprite method was called with the correct parameters
+    assert chip8.display.draw_sprite.called
+    args, _ = chip8.display.draw_sprite.call_args
+    assert args[0] == sprite_data
+    assert args[1] == sprite_x
+    assert args[2] == sprite_y
+
+    # Check if VF is set to 1 due to collision
+    assert chip8.registers.get_v(0xF) == 1
 
 
 def test_chip8_execute_opcode_Fx07(chip8, mocker):

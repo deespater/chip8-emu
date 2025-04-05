@@ -77,3 +77,42 @@ def test_render_output(capsys):
     assert len(display_data) == 32
     assert all(len(row) == 64 for row in display_data)
     assert display_data[11][22:30] == bytearray([1, 1, 1, 1, 0, 0, 1, 1])
+
+
+def test_draw_sprite_collision_flag():
+    display = Chip8Display()
+    sprite_data = bytes([0b11110000])  # A single row sprite
+
+    # Draw the sprite for the first time (no collision expected)
+    collision = display.draw_sprite(sprite_data, 0, 0)
+    assert not collision  # No collision on first draw
+
+    # Draw the same sprite again at almost the same position (with collision)
+    collision = display.draw_sprite(sprite_data, 1, 0)
+    assert collision  # Collision should be detected
+
+    # Verify that the pixels were XORed back to 0 where collision occurred
+    assert display.pixels[0][0:4] == bytearray([1, 0, 0, 0])
+    assert display.pixels[0][5:] == bytearray(display.WIDTH - 5)
+
+
+def test_draw_sprite_collision_flag_with_wrapping():
+    display = Chip8Display()
+    sprite_data = bytes([
+        0b11000011,
+        0b00111100,
+    ])
+
+    # Draw the sprite for the first time (no collision expected)
+    collision = display.draw_sprite(sprite_data, 62, 31)  # Near edges
+    assert not collision  # No collision on first draw
+
+    # Draw the same sprite again at the same position (collision expected)
+    collision = display.draw_sprite(sprite_data, 62, 31)
+    assert collision  # Collision should be detected
+
+    # Verify that the pixels were XORed back to 0 at wrapped positions
+    assert display.pixels[31][62:64] == bytearray([0, 0])
+    assert display.pixels[31][0:2] == bytearray([0, 0])
+    assert display.pixels[0][62:64] == bytearray([0, 0])
+    assert display.pixels[0][0:2] == bytearray([0, 0])
