@@ -16,18 +16,33 @@ class Chip8Display:
         sprite_x: int,
         sprite_y: int,
     ) -> None:
-        """Setting sprite data to display memory"""
-        for row_index, sprite_row_bytes in enumerate(sprite_data):
-            # Length of sprite_data is the height of sprite so we iterating
-            # each row of sprite
-            for column_index in range(8):  # Sprite is fixed 8 bit width
-                # Wrapping bits horizontally
-                dx = (sprite_x + column_index) % self.WIDTH
-                # Wrapping bits vertically
+        """
+        Setting sprite data to display memory
+        Length of sprite_data is the height of sprite so we iterating
+        each row of sprite
+        """
+        collision_detected = False
+
+        for row_index, sprite_byte in enumerate(sprite_data):
+            for bit_index in range(8):  # Sprite is fixed 8 bit width
+                sprite_pixel = (sprite_byte >> (7 - bit_index)) & 1
+
+                if sprite_pixel == 0:
+                    continue  # Skip if pixel is off
+
+                # Wrapping bits horizontally and vertically
+                dx = (sprite_x + bit_index) % self.WIDTH
                 dy = (sprite_y + row_index) % self.HEIGHT
 
-                sprite_pixel = (sprite_row_bytes >> (7 - column_index)) & 1
-                self.pixels[dy][dx] = sprite_pixel
+                # If pixel is already on, we set collision_detected
+                if self.pixels[dy][dx] == 1:
+                    collision_detected = True
+
+                # XORing the screen pixel with sprite pixel
+                self.pixels[dy][dx] ^= sprite_pixel
+
+        # If collision is detected, we return glag to set the VF register to 1
+        return collision_detected
 
     def clear(self) -> None:
         """Clearing memory and setting it to 0"""

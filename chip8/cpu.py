@@ -36,8 +36,6 @@ class Chip8Registers:
 
 
 class Chip8:
-    FREQUENCY: int = 60  # Hz
-
     PROGRAM_START: int = 0x200
 
     display: Chip8Display
@@ -70,7 +68,7 @@ class Chip8:
         # Returning one "16-bit" integer from two read bytes
         return (high_byte << 8) | low_byte
 
-    def execute_opcode(self, opcode: int) -> None:
+    def execute_opcode(self, opcode: int) -> None:  # noqa: PLR0912
         nnn = opcode & 0x0FFF       # Addr: Lowest 12 bits of the opcode
         n = opcode & 0x000F         # Nibble: Lowest 4 bits of the opcode
         x = (opcode & 0x0F00) >> 8  # Register X: lower 4 bits of the high byte
@@ -127,12 +125,13 @@ class Chip8:
                 # VF is set to 1, otherwise it is set to 0. If the sprite is
                 # positioned so part of it is outside the coordinates of the
                 # display, it wraps around to the opposite side of the screen.
-                sprite_data = self.memory.read(self.registers.get_i(), n)
-                sprite_x = self.registers.get_v(x)
-                sprite_y = self.registers.get_v(y)
+                sprite = self.memory.read(self.registers.get_i(), n)
+                x = self.registers.get_v(x)
+                y = self.registers.get_v(y)
 
                 # Rendering the sprite
-                self.display.draw_sprite(sprite_data, sprite_x, sprite_y)
+                collision_flag = self.display.draw_sprite(sprite, x, y)
+                self.registers.set_v(0xF, int(collision_flag))
 
             case _ if opcode & 0xF0FF == 0xF007:
                 # Fx07 - LD Vx, DT
