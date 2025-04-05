@@ -3,7 +3,7 @@ from .errors import Chip8Panic
 from .input import Chip8Keyboard
 from .memory import Chip8Memory
 from .timers import DelayTimer, SoundTimer
-from .utils import parse_byte
+from .utils import QuartzClock, parse_byte
 
 
 class Chip8Registers:
@@ -35,7 +35,9 @@ class Chip8Registers:
         return self.i
 
 
-class Chip8:
+class Chip8(QuartzClock):
+    CLOCK_RATE: int = 100  # Hz
+
     PROGRAM_START: int = 0x200
 
     display: Chip8Display
@@ -49,6 +51,8 @@ class Chip8:
     counter: int
 
     def __init__(self) -> None:
+        super().__init__()
+
         self.display = Chip8Display()
         self.memory = Chip8Memory()
         self.registers = Chip8Registers()
@@ -202,13 +206,6 @@ class Chip8:
                 raise Chip8Panic(f'Unknown opcode "{hex(opcode)}"')
 
     def tick(self) -> None:
-        # Syncronizing timers clock
-        self.delay_timer.synchronize()
-        # self.sound_timer.synchronize()
-
-        # Synchonizing keyboard clock
-        self.keyboard.synchronize()
-
         # Fetching opcode and incrementing the counter
         opcode = self.fetch_opcode()
         self.counter += 2
@@ -221,4 +218,12 @@ class Chip8:
 
     def run(self) -> None:
         while True:
-            self.tick()
+            # Syncronizing timers clock
+            self.delay_timer.synchronize()
+            # self.sound_timer.synchronize()
+
+            # Synchonizing keyboard clock
+            self.keyboard.synchronize()
+
+            # Synchronizing CPU clock
+            self.synchronize()

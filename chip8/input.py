@@ -2,25 +2,7 @@ import time
 
 import blessed
 
-
-class QuartzClock:
-    CLOCK_RATE: int = 60  # Hz
-
-    time_of_last_tick: float
-
-    def __init__(self) -> None:
-        self.time_of_last_tick = time.time()
-
-    def synchronize(self) -> None:
-        # Actually tick only if 1/60th of a second has passed
-        time_now = time.time()
-
-        if time_now - self.time_of_last_tick >= 1 / self.CLOCK_RATE:
-            self.tick()
-            self.time_of_last_tick = time_now
-
-    def tick(self) -> None:
-        raise NotImplementedError('Tick method not implemented')
+from .utils import QuartzClock
 
 
 class Chip8Keyboard(QuartzClock):
