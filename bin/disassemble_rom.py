@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 
@@ -54,7 +55,11 @@ def read_opcode(opcode: int) -> str:
 
 
 if __name__ == '__main__':
-    rom_data = Path('./demo.bin').read_bytes()
+    parser = argparse.ArgumentParser(description='Run the CHIP-8 emulator.')
+    parser.add_argument('rom_path', type=str, help='Path to the ROM file to load.')
+    args = parser.parse_args()
+
+    rom_data = Path(args.rom_path).read_bytes()
 
     for i in range(0, len(rom_data), 2):
         # Read two bytes from the ROM data
