@@ -94,6 +94,15 @@ class Chip8(QuartzClock):
                 # The interpreter sets the program counter to nnn.
                 self.counter = nnn
 
+            case _ if opcode & 0xF000 == 0x3000:
+                # 3xkk - SE Vx, byte
+                # Skip next instruction if Vx = kk
+
+                # The interpreter compares register Vx to kk, and if they are
+                # equal, increments the program counter by 2.
+                if self.registers.get_v(x) == kk:
+                    self.counter += 2
+
             case _ if opcode & 0xF000 == 0x6000:
                 # 6xkk - LD Vx, byte
                 # Set Vx = kk.

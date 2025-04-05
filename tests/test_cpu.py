@@ -212,6 +212,21 @@ def test_chip8_execute_opcode_8004(vx, vy, expected_vx, expected_carry, chip8):
     assert chip8.registers.get_v(0xF) == expected_carry
 
 
+@pytest.mark.parametrize(('v_index', 'v_value', 'opcode', 'offset'), [
+    (0, 0xFF, 0x30FF, 2),  # V0 == 0xFF
+    (0, 0x01, 0x30FF, 0),  # V0 != 0xFF
+    (1, 0xAA, 0x31AA, 2),  # V1 == 0xAA
+    (1, 0xBB, 0x31AA, 0),  # V1 != 0xAA
+])
+def test_chip8_execute_opcode_3xkk(v_index, v_value, opcode, offset, chip8):
+    counter_before_opcode = chip8.counter
+
+    chip8.registers.set_v(v_index, v_value)
+    chip8.execute_opcode(opcode)
+
+    assert counter_before_opcode + offset == chip8.counter
+
+
 def test_chip8_execute_opcode_unknown(chip8):
     with pytest.raises(Chip8Panic, match='Unknown opcode "0xffff"'):
         chip8.execute_opcode(0xFFFF)

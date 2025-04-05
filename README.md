@@ -9,7 +9,7 @@
 - [ ] 00EE - RET: Return from a subroutine
 - [x] 1nnn - JP addr: Jump to location nnn
 - [ ] 2nnn - CALL addr: Call subroutine at nnn
-- [ ] 3xkk - SE Vx, byte: Skip next instruction if Vx = kk
+- [x] 3xkk - SE Vx, byte: Skip next instruction if Vx = kk
 - [x] 4xkk - SNE Vx, byte: Skip next instruction if Vx != kk
 - [ ] 5xy0 - SE Vx, Vy: Skip next instruction if Vx = Vy
 - [x] 6xkk - LD Vx, byte: Set Vx = kk
@@ -31,7 +31,7 @@
 - [ ] Ex9E - SKP Vx: Skip next instruction if key with the value of Vx is pressed
 - [ ] ExA1 - SKNP Vx: Skip next instruction if key with the value of Vx is not pressed
 - [x] Fx07 - LD Vx, DT: Set Vx = delay timer value
-- [ ] Fx0A - LD Vx, K: Wait for a key press, store the value of the key in Vx
+- [x] Fx0A - LD Vx, K: Wait for a key press, store the value of the key in Vx
 - [x] Fx15 - LD DT, Vx: Set delay timer = Vx
 - [x] Fx18 - LD ST, Vx: Set sound timer = Vx
 - [ ] Fx1E - ADD I, Vx: Set I = I + Vx
